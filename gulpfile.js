@@ -31,33 +31,21 @@ gulp.task('clean', function() {
 });
 
 
-gulp.task('lint', ['lint:js:src', 'lint:js:test', 'lint:json']);
+gulp.task('lint', ['lint:js', 'lint:json']);
 
 
-gulp.task('lint:js:src', function() {
+gulp.task('lint:js', function() {
 	const eslint = require('gulp-eslint');
 
 	return gulp.src([
-		'main.js',
 		'examples/**/*.js',
-		'lib/**/*.js'
+		'lib/**/*.js',
+		'test/**/*.js',
+		'gulpfile.js',
+		'main.js'
 	])
 		.pipe(eslint({
 			configFile: 'eslint.json'
-		}))
-		.pipe(eslint.formatEach());
-});
-
-
-gulp.task('lint:js:test', function() {
-	const eslint = require('gulp-eslint');
-
-	return gulp.src([
-		'gulpfile.js',
-		'test/**/*.js'
-	])
-		.pipe(eslint({
-			configFile: 'eslint.2017.json'
 		}))
 		.pipe(eslint.formatEach());
 });
@@ -96,7 +84,7 @@ gulp.task('package', function() {
 		base: '..'
 	})
 		.pipe(rename(function(location) {
-			location.dirname = location.dirname.replace(renameExpression, 'package');
+			location.dirname = location.dirname.replace(renameExpression, pkg.name);
 
 			return location;
 		}))
@@ -123,4 +111,16 @@ gulp.task('test', function() {
 		.pipe(mocha({
 			reporter: 'dot'
 		}));
+});
+
+gulp.task('test:verbose', function() {
+	const mocha = require('gulp-mocha');
+
+	gulp.src([
+		'test/**/*.js'
+	], {
+		nodir: true,
+		read: false
+	})
+		.pipe(mocha());
 });

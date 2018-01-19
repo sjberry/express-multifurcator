@@ -3,6 +3,5 @@ examples/
 node_modules/
 test/
 .gitignore
-.npmignore
-eslint*.json
+eslint.json
 gulpfile.js

@@ -1,34 +1,48 @@
 {
   "name": "express-multifurcator",
-  "version": "0.0.0",
-  "description": "Expressive and semi-automatic express application instantiation.",
-  "author": "Steven Berry <steven@sberry.me>",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Expressive and semi-automatic ExpressJS application instantiation and binding.",
+  "keywords": ["ExpressJS", "express", "middleware", "hostname", "subdomain", "router"],
+  "author": {
+    "name": "Steven Berry",
+    "email": "steven@sberry.me",
+    "website": "https://sberry.me"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/sjberry/express-multifurator.git"
   },
-  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sjberry/express-multifurcator/issues"
+  },
   "main": "main",
   "dependencies": {
-    "http-errors": "^1.6.2",
-    "url-parse": "^1.1.9"
+    "is-plain-object": "2.0.4",
+    "url-parse": "1.1.9"
   },
   "peerDependencies": {
     "express": "4.x.x"
   },
+  "optionalDependencies": {
+    "http-errors": "1.x.x"
+  },
   "devDependencies": {
-    "chai": "^4.1.2",
-    "chai-as-promised": "^7.1.1",
-    "gulp": "^3.9.1",
-    "gulp-clean": "^0.3.2",
-    "gulp-eslint": "^4.0.0",
-    "gulp-gzip": "^1.4.0",
-    "gulp-jsonlint": "^1.2.0",
-    "gulp-mocha": "^4.3.1",
-    "gulp-rename": "^1.2.2",
-    "gulp-tar": "^2.0.0",
-    "run-sequence": "^2.2.0",
-    "sinon": "^4.0.0",
-    "sinon-chai": "^2.13.0"
+    "chai": "4.1.2",
+    "chai-as-promised": "7.1.1",
+    "express": "4.16.2",
+    "gulp": "3.9.1",
+    "gulp-clean": "0.3.2",
+    "gulp-eslint": "4.0.0",
+    "gulp-gzip": "1.4.0",
+    "gulp-jsonlint": "1.2.0",
+    "gulp-mocha": "4.3.1",
+    "gulp-rename": "1.2.2",
+    "gulp-tar": "2.0.0",
+    "request": "2.83.0",
+    "request-promise-native": "1.0.5",
+    "run-sequence": "2.2.0",
+    "sinon": "4.0.0",
+    "sinon-chai": "2.13.0"
   }
 }
