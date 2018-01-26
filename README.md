@@ -1,8 +1,9 @@
 # express-multifurcator
 
-`express-multifurcator` is an application routing library that enables mounting multiple "applications" onto ExpressJS HTTP servers and dynamic runtime configuration using 12-factor standards.
-It also provides a more expressive and standards-compliant interface for listening to interfaces with ExpressJS servers.
-No callbacks!
+  * **Hostname-based subdomain routing** &ndash; Route requests according to their hostname. Mount multiple applications or microservices on the same ExpressJS application.
+  * **Hostname aliasing** &ndash; Redirect secondary subdomains to a primary subdomain, e.g. `www.example.com` to `example.com`.
+  * **HTTP to HTTPS redirection** &ndash; Optionally redirect insecure requests to HTTPS at the application level. Works well for environments that don't support webserver-level HTTPS redirection (like AWS load balancers).
+  * **Configurable application binding** &ndash; Easily bind multiple applications to different ports... or the same port... or anything in between... managed entirely by `config.json`.  
 
 
 ## Motivation
@@ -29,20 +30,18 @@ Consider another scenario:
   * On production you want to deploy the same codebase to two different boxes and have one box run the API and the other box run the web portal.
   * You want to keep your `app.js` clean, 12-factor compliant, and boot your services according to an external JSON configuration.
 
-Cases such as these might result in an unmaintainable mess of boilerplate, and this is the sort of problem `express-multifurcator` was designed to resolve.
+Cases such as these might result in an unmaintainable mess of boilerplate, and this is the sort of problem express-multifurcator was designed to resolve.
 
 
 ## Installation
-
-Installation is fairly straightforward, but may require additional steps.
 
 ```
 npm install express-multifurcator express
 ```
 
 ExpressJS is listed as a peer dependency.
-It is technically possible to install and work with `express-multifurcator` without installing ExpressJS.
-The middleware generated with `express-multifurcator` can be mounted in any application that subscribes to the same request handling pattern as ExpressJS.
+It is technically possible to install and work with express-multifurcator without installing ExpressJS.
+The middleware generated with express-multifurcator can be mounted in any application that subscribes to the same request handling pattern as ExpressJS.
 However this is not recommended as certain ExpressJS features are assumed internally, particularly in obtaining a request's hostname, original URL, etc.
 
 Installing optional dependencies is recommended:
@@ -57,9 +56,6 @@ However, any error generating function can be used in lieu of `http-errors` as d
 
 ## Usage
 
-Let's cover some use case examples.
-If you'd like more specific or detailed examples, be sure to check out the [`/examples`](/examples) directory.
-
 ### Basic
 
 Consider the most basic use case.
@@ -72,40 +68,48 @@ const express = require('express');
 // Create a Multifurcator container.
 let container = new Multifurcator();
 
-// Our basic "application." Instead of a full ExpressJS app we instantiate a Router.
-// Don't worry, `.getListeners()` will create the necessary ExpressJS apps that you're used to!
+// Our basic "application." Instead of a full ExpressJS app we instantiate a
+// Router. Don't worry, `.getListeners()` will create the necessary ExpressJS
+// apps that you're used to!
 let app = express.Router();
 
-// We need a basic middleware function added to our "application" so it will do something.
+// We need a basic middleware function added to our "application" so it will do
+// something.
 app.use(function(req, res) {
     res.sendStatus(204);
 });
 
 // All right, now let's add our "application" to the container using an address.
-// This address could very well have come from `config.app.address` or some other externally configured parameter. 
+// This address could very well have come from `config.app.address` or some
+// other externally configured parameter. 
 container.add(app, 'http://localhost:8000');
 
 // We don't have any other apps to add in this, the simplest of cases!
 
-// Now we can obtain an array of generated "listener" objects. This array will contain more than one element if multiple
-// applications are mounted with different addresses (detailed below).
+// Now we can obtain an array of generated "listener" objects. This array will
+// contain more than one element if multiple applications are mounted with
+// different addresses (detailed below).
 let listeners = container.getListeners();
 
 for (let i = 0; i < listeners.length; i++) {
     let listener = listeners[i];
 
-    // Each listener object contains the binding information (interface, protocol, port), an instantiated ExpressJS
-    // application, the generated application routing middleware function, and a listen function unique to the
-    // instantiated ExpressJS application.
+    // Each listener object contains the binding information (interface,
+    // protocol, port), an instantiated ExpressJS application, the generated
+    // application routing middleware function, and a listen function unique to
+    // the instantiated ExpressJS application.
 
-    // Our generated handler function is NOT automatically mounted on the ExpressJS application. This is because you
-    // might want to mount your own middleware ahead of the multifurcator routing middleware (e.g. body parsing, cookie
-    // parsing, logging, etc.). In this case we don't have any other middleware, so we'll just mount the handler.
+    // Our generated handler function is NOT automatically mounted on the
+    // ExpressJS application. This is because you might want to mount your own
+    // middleware ahead of the multifurcator routing middleware (e.g. body
+    // parsing, cookie parsing, logging, etc.). In this case we don't have any
+    // other middleware, so we'll just mount the handler.
     listener.app.use(listener.handler);
 
-    listener.listen() // Boots the listener. Returns a Promise, no callbacks necessary! Hurray!
+    listener.listen() // Binds the listener to it's interface/port.
         .then(function(server) {
-            // Resolves with the HTTP server, equivalent to ExpressJS's native app.listen().
+            // Resolves with the HTTP server.
+            // Same value as the return of ExpressJS's app.listen().
         }); 
 }
 ```
@@ -165,7 +169,7 @@ let app = express.Router();
 ...
 
 container.add(app, 'http://localhost:8000', {
-    hostnames: ['example.com'], // or 'example.com' as a literal string (i.e. you don't need to wrap it in an array)
+    hostnames: ['example.com'], // or 'example.com' as a literal string
     aliases: ['www.example.com', 'blog.example.com']
 });
 
@@ -314,6 +318,7 @@ let app = express();
 
 listen(app, 'http://localhost:8000')
     .then(function(server) {
-        // Resolves with the HTTP server, equivalent to ExpressJS's native app.listen().
+        // Resolves with the HTTP server.
+        // Same value as the return of ExpressJS's app.listen().
     });
 ```
