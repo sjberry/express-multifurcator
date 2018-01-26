@@ -1,6 +1,6 @@
 {
   "name": "express-multifurcator",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "MIT",
   "description": "Configurable port and subdomain routing for ExpressJS.",
   "keywords": ["12-factor", "config", "express", "express-hostname", "express-subdomain", "hostname", "subdomain"],
