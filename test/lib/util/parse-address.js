@@ -11,17 +11,19 @@ const parseAddress = require('../../../lib/util/parse-address');
 chai.use(require('chai-as-promised'));
 
 
-const CWD = process.cwd();
-
-
 describe('util/parse-address', function() {
+	beforeEach(function() {
+		process.chdir(__dirname);
+	});
+
 	it('should process a fully qualified IPv4 address', function() {
 		let result = parseAddress('http://127.0.0.1:8000');
 
 		expect(result).to.deep.equal({
 			protocol: 'http',
 			interface: '127.0.0.1',
-			port: 8000
+			port: 8000,
+			domainSocket: false
 		});
 	});
 
@@ -39,7 +41,8 @@ describe('util/parse-address', function() {
 		expect(result).to.deep.equal({
 			protocol: 'http',
 			interface: '*',
-			port: 8000
+			port: 8000,
+			domainSocket: false
 		});
 	});
 
@@ -49,7 +52,8 @@ describe('util/parse-address', function() {
 		expect(result).to.deep.equal({
 			protocol: 'http',
 			interface: '*',
-			port: 8000
+			port: 8000,
+			domainSocket: false
 		});
 	});
 
@@ -59,7 +63,8 @@ describe('util/parse-address', function() {
 		expect(result).to.deep.equal({
 			protocol: 'http',
 			interface: path.sep + path.join('foo', 'bar'),
-			port: null
+			port: null,
+			domainSocket: true
 		});
 	});
 
@@ -68,8 +73,9 @@ describe('util/parse-address', function() {
 
 		expect(result).to.deep.equal({
 			protocol: 'http',
-			interface: path.join(CWD, 'foo', 'bar'),
-			port: null
+			interface: path.join(process.cwd(), 'foo', 'bar'),
+			port: null,
+			domainSocket: true
 		});
 	});
 
@@ -94,8 +100,9 @@ describe('util/parse-address', function() {
 
 		expect(result).to.deep.equal({
 			protocol: 'https',
-			interface: path.join(CWD, 'foo', 'bar'),
-			port: null
+			interface: path.join(process.cwd(), 'foo', 'bar'),
+			port: null,
+			domainSocket: true
 		});
 	});
 });

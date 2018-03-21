@@ -15,7 +15,7 @@ chai.use(require('chai-as-promised'));
 
 let resources = [];
 
-let listen = async function(application, options = {}) {
+async function listen(application, options = {}) {
 	let listeners = application.getListeners();
 
 	for (let i = 0; i < listeners.length; i++) {
@@ -25,7 +25,7 @@ let listen = async function(application, options = {}) {
 			listener.handler,
 
 			function(err, req, res, next) { // eslint-disable-line no-unused-vars
-				res.sendStatus(err.statusCode);
+				res.sendStatus(err.statusCode || 500);
 			}
 		]);
 
@@ -35,8 +35,7 @@ let listen = async function(application, options = {}) {
 
 		resources.push(server);
 	}
-};
-
+}
 
 describe('Behavior: Insecure Redirection', function() {
 	afterEach(function() {
@@ -116,7 +115,10 @@ describe('Behavior: Insecure Redirection', function() {
 				res.sendStatus(204);
 			});
 
-			application.add(app, 'https://localhost:8000');
+			application.add(app, 'https://localhost:8000', {
+				forceTLS: true
+			});
+
 			await listen(application);
 
 			let response = await request('http://localhost:8000', {
@@ -140,7 +142,9 @@ describe('Behavior: Insecure Redirection', function() {
 				res.sendStatus(204);
 			});
 
-			application.add(app, 'https://localhost:8000');
+			application.add(app, 'https://localhost:8000', {
+				forceTLS: true
+			});
 
 			await listen(application, {
 				trustProxy: true
@@ -170,7 +174,9 @@ describe('Behavior: Insecure Redirection', function() {
 				res.sendStatus(204);
 			});
 
-			application.add(app, 'https://localhost:8000');
+			application.add(app, 'https://localhost:8000', {
+				forceTLS: true
+			});
 
 			await listen(application);
 
@@ -185,7 +191,7 @@ describe('Behavior: Insecure Redirection', function() {
 			expect(response.headers.location).to.equal('https://localhost:8000/foo?bar=baz');
 		});
 
-		it('should not redirect insecure requests made to co-mounted, insecure request-permitting listeners', async function() {
+		it('should accept insecure requests to a particular interface if a separate application has been configured to handle them', async function() {
 			let application = new Multifurcator();
 
 			let app1 = express.Router();
@@ -211,6 +217,8 @@ describe('Behavior: Insecure Redirection', function() {
 			application.add(app2, 'http://localhost:8000', {
 				hostnames: ['example.org']
 			});
+
+			//console.log(application._listeners.get('localhost:8000')._handlers._root);
 
 			await listen(application, {
 				trustProxy: true

@@ -16,7 +16,16 @@ chai.use(require('sinon-chai'));
 chai.use(require('chai-as-promised'));
 
 
+function randomFilename() {
+	return Math.random().toString(36).slice(2, 7);
+}
+
+
 describe('util/listen', function() {
+	beforeEach(function() {
+		process.chdir(__dirname);
+	});
+
 	it('should publish as a method property on the main export', function() {
 		expect(Multifurcator.listen).to.equal(listen);
 	});
@@ -31,7 +40,6 @@ describe('util/listen', function() {
 		});
 
 		let server = await listen(app, 'http://localhost:8000');
-
 		let response = await request('http://localhost:8000', {
 			followRedirect: false,
 			simple: false,
@@ -53,9 +61,10 @@ describe('util/listen', function() {
 			res.sendStatus(204);
 		});
 
-		let server = await listen(app, 'http://unix:' + path.join(process.cwd(), 'test', 'sockets', 'binding.sock'));
-
-		let response = await request('http://unix:' + path.join(process.cwd(), 'test', 'sockets', 'binding.sock'), {
+		let socket = randomFilename() + '.sock';
+		let curpath = path.resolve(path.join(process.cwd(), '..', '..', 'sockets', socket));
+		let server = await listen(app, `http://unix:${curpath}`);
+		let response = await request(`http://unix:${curpath}`, {
 			followRedirect: false,
 			simple: false,
 			resolveWithFullResponse: true,
@@ -79,9 +88,9 @@ describe('util/listen', function() {
 			res.sendStatus(204);
 		});
 
-		let server = await listen(app, 'http://unix:./test/sockets/binding.sock');
-
-		let response = await request('http://unix:' + path.join(process.cwd(), 'test', 'sockets', 'binding.sock'), {
+		let socket = randomFilename() + '.sock';
+		let server = await listen(app, `http://unix:./../../sockets/${socket}`);
+		let response = await request('http://unix:' + path.join(process.cwd(), '..', '..', 'sockets', socket), {
 			followRedirect: false,
 			simple: false,
 			resolveWithFullResponse: true,
@@ -101,16 +110,14 @@ describe('util/listen', function() {
 		let spy = sinon.spy();
 		let cwd = process.cwd();
 
-		process.chdir(path.join(cwd, 'test'));
-
 		app.use(function(req, res) {
 			spy();
 			res.sendStatus(204);
 		});
 
-		let server = await listen(app, 'http://unix:../test/sockets/binding.sock');
-
-		let response = await request('http://unix:' + path.join(process.cwd(), '..', 'test', 'sockets', 'binding.sock'), {
+		let socket = randomFilename() + '.sock';
+		let server = await listen(app, `http://unix:../../sockets/${socket}`);
+		let response = await request('http://unix:' + path.join(process.cwd(), '..', '..', 'sockets', socket), {
 			followRedirect: false,
 			simple: false,
 			resolveWithFullResponse: true,

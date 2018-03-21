@@ -15,7 +15,7 @@ chai.use(require('chai-as-promised'));
 
 let resources = [];
 
-let listen = async function(application) {
+async function listen(application) {
 	let listeners = application.getListeners();
 
 	for (let i = 0; i < listeners.length; i++) {
@@ -25,7 +25,7 @@ let listen = async function(application) {
 			listener.handler,
 
 			function(err, req, res, next) { // eslint-disable-line no-unused-vars
-				res.sendStatus(err.statusCode);
+				res.sendStatus(err.statusCode || 500);
 			}
 		]);
 
@@ -33,8 +33,7 @@ let listen = async function(application) {
 
 		resources.push(server);
 	}
-};
-
+}
 
 describe('Behavior: Single-port listeners', function() {
 	afterEach(function() {

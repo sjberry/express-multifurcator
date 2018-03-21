@@ -17,7 +17,7 @@ chai.use(require('chai-as-promised'));
 
 let resources = [];
 
-let listen = async function(application) {
+async function listen(application) {
 	let listeners = application.getListeners();
 
 	for (let i = 0; i < listeners.length; i++) {
@@ -27,6 +27,8 @@ let listen = async function(application) {
 			listener.handler,
 
 			function(err, req, res, next) { // eslint-disable-line no-unused-vars
+				console.log(err); // eslint-disable-line no-console
+
 				res.sendStatus(err.statusCode || 500);
 			}
 		]);
@@ -35,10 +37,17 @@ let listen = async function(application) {
 
 		resources.push(server);
 	}
-};
+}
 
+function randomFilename() {
+	return Math.random().toString(36).slice(2, 7);
+}
 
 describe('Behavior: Generated listeners', function() {
+	beforeEach(function() {
+		process.chdir(__dirname);
+	});
+
 	afterEach(function() {
 		for (let i = 0; i < resources.length; i++) {
 			resources[i].close();
@@ -81,11 +90,13 @@ describe('Behavior: Generated listeners', function() {
 			res.sendStatus(204);
 		});
 
-		application.add(app, 'http://unix:' + path.join(process.cwd(), 'test', 'sockets', 'binding.sock'));
+		let socket = randomFilename() + '.sock';
+
+		application.add(app, 'http://unix:' + path.resolve(path.join(process.cwd(), '..', 'sockets', socket)));
 
 		await listen(application);
 
-		let response = await request('http://unix:' + path.join(process.cwd(), 'test', 'sockets', 'binding.sock'), {
+		let response = await request('http://unix:' + path.join(process.cwd(), '..', 'sockets', socket), {
 			followRedirect: false,
 			simple: false,
 			resolveWithFullResponse: true,
@@ -108,11 +119,13 @@ describe('Behavior: Generated listeners', function() {
 			res.sendStatus(204);
 		});
 
-		application.add(app, 'http://unix:./test/sockets/binding.sock');
+		let socket = randomFilename() + '.sock';
+
+		application.add(app, `http://unix:./../sockets/${socket}`);
 
 		await listen(application);
 
-		let response = await request('http://unix:' + path.join(process.cwd(), 'test', 'sockets', 'binding.sock'), {
+		let response = await request('http://unix:' + path.join(process.cwd(), '..', 'sockets', socket), {
 			followRedirect: false,
 			simple: false,
 			resolveWithFullResponse: true,
@@ -129,20 +142,19 @@ describe('Behavior: Generated listeners', function() {
 		let application = new Multifurcator();
 		let app = express.Router();
 		let spy = sinon.spy();
-		let cwd = process.cwd();
-
-		process.chdir(path.join(cwd, 'test'));
 
 		app.use(function(req, res) {
 			spy();
 			res.sendStatus(204);
 		});
 
-		application.add(app, 'http://unix:../test/sockets/binding.sock');
+		let socket = randomFilename() + '.sock';
+
+		application.add(app, `http://unix:../sockets/${socket}`);
 
 		await listen(application);
 
-		let response = await request('http://unix:' + path.join(process.cwd(), '..', 'test', 'sockets', 'binding.sock'), {
+		let response = await request('http://unix:' + path.join(process.cwd(), '..', 'sockets', socket), {
 			followRedirect: false,
 			simple: false,
 			resolveWithFullResponse: true,
@@ -150,8 +162,6 @@ describe('Behavior: Generated listeners', function() {
 				Host: 'localhost'
 			}
 		});
-
-		process.chdir(cwd);
 
 		expect(response.statusCode).to.equal(204);
 		expect(spy).to.have.been.calledOnce;

@@ -7,4 +7,4 @@ const listen = require('./lib/util/listen');
 Multifurcator.listen = listen;
 
 
-module.exports = require('./lib/multifurcator');
+module.exports = Multifurcator;
