@@ -105,7 +105,7 @@ describe('Behavior: Insecure Redirection', function() {
 			expect(response.statusCode).to.equal(404);
 		});
 
-		it('should redirect insecure requests to HTTP listeners', async function() {
+		it('should redirect insecure requests to HTTP listeners if `forceTLS` was specified when the application was added', async function() {
 			let application = new Multifurcator();
 			let app = express.Router();
 			let spy = sinon.spy();
@@ -132,7 +132,7 @@ describe('Behavior: Insecure Redirection', function() {
 			expect(response.headers.location).to.equal('https://localhost:8000/');
 		});
 
-		it('should redirect insecure requests using the forwarded hostname if the proxy is trusted', async function() {
+		it('should redirect insecure requests to HTTP listeners if `forceTLS` is specified using the forwarded hostname if the proxy is trusted', async function() {
 			let application = new Multifurcator();
 			let app = express.Router();
 			let spy = sinon.spy();
@@ -217,8 +217,6 @@ describe('Behavior: Insecure Redirection', function() {
 			application.add(app2, 'http://localhost:8000', {
 				hostnames: ['example.org']
 			});
-
-			//console.log(application._listeners.get('localhost:8000')._handlers._root);
 
 			await listen(application, {
 				trustProxy: true

@@ -4,12 +4,10 @@ const chai = require('chai');
 const expect = require('chai').expect;
 const express = require('express');
 const request = require('request-promise-native');
-const sinon = require('sinon');
 
 const Multifurcator = require('../../main');
 
 
-chai.use(require('sinon-chai'));
 chai.use(require('chai-as-promised'));
 
 
@@ -140,13 +138,6 @@ describe('Behavior: Hostname aliasing', function() {
 
 	it('should support port specification in the alias redirection specification', async function() {
 		let application = new Multifurcator();
-		let app = express.Router();
-		let spy = sinon.spy();
-
-		app.use(function(req, res) {
-			spy();
-			res.sendStatus(204);
-		});
 
 		application.redirect('http://localhost:8000', {
 			'example.org': 'http://example.com:8000'
@@ -163,8 +154,41 @@ describe('Behavior: Hostname aliasing', function() {
 			}
 		});
 
-		expect(spy).to.not.have.been.called;
 		expect(response.statusCode).to.equal(302);
 		expect(response.headers.location).to.equal('http://example.com:8000/');
+	});
+
+	it('should support protocol manipulation in the alias redirection specification', async function() {
+		let application = new Multifurcator();
+
+		application.redirect('http://localhost:8000', {
+			'example.org': 'https://example.com'
+		});
+
+		await listen(application);
+
+		let response = await request('http://localhost:8000', {
+			followRedirect: false,
+			simple: false,
+			resolveWithFullResponse: true,
+			headers: {
+				Host: 'example.org'
+			}
+		});
+
+		expect(response.statusCode).to.equal(302);
+		expect(response.headers.location).to.equal('https://example.com/');
+	});
+
+	it('should throw if a specified redirection protocol does not match the inbound protocol family', async function() {
+		function fn() {
+			let application = new Multifurcator();
+
+			application.redirect('http://localhost:8000', {
+				'example.org': 'wss://example.com'
+			});
+		}
+
+		expect(fn).to.throw(Error);
 	});
 });

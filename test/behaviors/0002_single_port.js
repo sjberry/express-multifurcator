@@ -97,7 +97,7 @@ describe('Behavior: Single-port listeners', function() {
 		});
 
 		describe('when a hostname is specified', function() {
-			it('should raise an error for requests that do not contain a hostname header', async function() {
+			it('should not handle requests that do not specify a hostname', async function() {
 				let application = new Multifurcator();
 				let app = express.Router();
 				let spy = sinon.spy();
@@ -145,6 +145,37 @@ describe('Behavior: Single-port listeners', function() {
 					resolveWithFullResponse: true,
 					headers: {
 						Host: 'example.com'
+					}
+				});
+
+				expect(response.statusCode).to.equal(204);
+				expect(spy).to.have.been.calledOnce;
+			});
+		});
+
+		describe('when a hostname is specified with a port', function() {
+			it('should accept and respond to requests that contain a hostname header', async function() {
+				let application = new Multifurcator();
+				let app = express.Router();
+				let spy = sinon.spy();
+
+				app.use(function(req, res) {
+					spy();
+					res.sendStatus(204);
+				});
+
+				application.add(app, 'http://localhost:8000', {
+					hostnames: ['example.com:8000']
+				});
+
+				await listen(application);
+
+				let response = await request('http://localhost:8000', {
+					followRedirect: false,
+					simple: false,
+					resolveWithFullResponse: true,
+					headers: {
+						Host: 'example.com:8000'
 					}
 				});
 
