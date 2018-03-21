@@ -144,21 +144,8 @@ container.redirect('http://localhost:8000', {
 ...
 ```
 
-If we're only using one primary hostname we can use shorthand notation for behavior logically equivalent to the first example in this sub-section.
-Note that shorthand notation doesn't support protocol modification.
 
-```js
-let app = express.Router();
-
-...
-
-container.add(app, 'http://localhost:8000', {
-    hostnames: ['example.com'], // or 'example.com' as a literal string
-    aliases: ['www.example.com', 'blog.example.com']
-});
-
-...
-```
+### Wildcards
 
 Wildcards are currently supported as the **first domain segment only** (e.g. `*.example.com`) for both `.add()` and `.redirect()`.
 
