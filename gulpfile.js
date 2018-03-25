@@ -7,9 +7,7 @@ const sequence = require('run-sequence');
 let pkg = require('./package.json');
 
 
-gulp.task('default', function(done) {
-	sequence('build', done);
-});
+gulp.task('default', ['build']);
 
 
 gulp.task('build', function(done) {
@@ -100,7 +98,16 @@ gulp.task('package', function() {
 
 
 gulp.task('test', function() {
+	const program = require('commander');
 	const mocha = require('gulp-mocha');
+
+	program
+		.option('-v, --verbose', 'Display verbose output.')
+		.parse(process.argv);
+
+	let mochaOptions = {
+		reporter: program.verbose ? 'spec' : 'dot'
+	};
 
 	gulp.src([
 		'test/**/*.js'
@@ -108,19 +115,5 @@ gulp.task('test', function() {
 		nodir: true,
 		read: false
 	})
-		.pipe(mocha({
-			reporter: 'dot'
-		}));
-});
-
-gulp.task('test:verbose', function() {
-	const mocha = require('gulp-mocha');
-
-	gulp.src([
-		'test/**/*.js'
-	], {
-		nodir: true,
-		read: false
-	})
-		.pipe(mocha());
+		.pipe(mocha(mochaOptions));
 });

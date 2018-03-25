@@ -13,7 +13,9 @@ app.use(function(req, res) {
 	res.sendStatus(204);
 });
 
-application.add(app, 'https://localhost:8000');
+application.add(app, 'https://localhost:8000', {
+	forceTLS: true
+});
 
 
 let listeners = application.getListeners();

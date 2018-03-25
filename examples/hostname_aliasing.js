@@ -14,10 +14,11 @@ app.use(function(req, res) {
 });
 
 application.add(app, 'http://localhost:8000', {
-	hostnames: ['example.com'],
-	aliases: {
-		'example.org': 'example.com'
-	}
+	hostnames: ['example.com']
+});
+
+application.redirect('http://localhost:8000', {
+	'example.org': 'example.com'
 });
 
 

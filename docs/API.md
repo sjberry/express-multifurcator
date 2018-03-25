@@ -2,6 +2,7 @@
 
 * [Multifurcator](#multifurcatoroptions) - Constructor for the Multifurcator class.
   * [{Multifurcator}.add](#multifurcatoraddapp-address-options) - Adds an application to a Multifurcator instance.
+  * [{Multifurcator}.redirect](#multifurcatorredirectaddress-hostnames-options) - Adds a redirection handler to a Multifurcator instance.
   * [{Multifurcator}.getListeners](#multifurcatorgetlisteners) - Returns an array of listener objects after all applications have been added to a Multifurcator instance.
 * [Multifurcator.listen](#multifurcatorlistenapp-address) - A utility function that can be used to call ExpressJS `.listen()`, returning a Promise instead of requiring event listening callbacks.
 
@@ -142,6 +143,17 @@ Type: `Object`
 An options configuration object to pass to the `add` method.
 Can be used to configure hostname routing and redirection.
 
+##### options.forceTLS
+
+Type: `Boolean`
+
+A flag indicating whether or not an application should be mounted spanning HTTPS and HTTP.
+Has no effect unless the mounted `address` is HTTPS.
+
+A value of `true` manifests in insecure requests being redirected to their secure counterpart.
+
+An error will be thrown if an application has been previously mounted on the same address and hostname with the HTTP protocol.
+
 ##### options.hostnames
 
 Type: `String` or `Array<String>`
@@ -172,6 +184,9 @@ It is not possible to mount multiple applications using the same address and hos
 So if any other apps are added to the same Multifurcator instance they either must specify an unused address or a hostname (or set of hostnames) previously unused.
 
 If no hostnames are specified, a logically equivalent hostname of `*` is used internally by default.
+
+
+### {Multifurcator}.redirect(address, hostnames[, options])
 
 ##### options.aliases
 
